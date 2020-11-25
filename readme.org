@@ -3,6 +3,46 @@
 #+DATE: <2020-11-25 三>
 #+OPTIONS: ^:nil
 
+* 运行截图
++ 文法串识别和 FIRST/FOLLOW
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:44:40
+  [[file:运行截图/2020-11-26_00-44-40_screenshot.png]]
+
++ 求得的项目族
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:45:19
+  [[file:运行截图/2020-11-26_00-45-19_screenshot.png]]
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:45:36
+  [[file:运行截图/2020-11-26_00-45-36_screenshot.png]]
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:46:53
+  [[file:运行截图/2020-11-26_00-46-53_screenshot.png]]
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:47:20
+  [[file:运行截图/2020-11-26_00-47-20_screenshot.png]]
+
++ 文法分析表
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:54:22
+  [[file:运行截图/2020-11-26_00-54-22_screenshot.png]]
+
+
++ 待约串分析动作表
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:48:40
+  [[file:运行截图/2020-11-26_00-48-40_screenshot.png]]
+  
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:49:00
+  [[file:运行截图/2020-11-26_00-49-00_screenshot.png]]
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:49:14
+  [[file:运行截图/2020-11-26_00-49-14_screenshot.png]]
+
+  #+DOWNLOADED: screenshot @ 2020-11-26 00:49:23
+  [[file:运行截图/2020-11-26_00-49-23_screenshot.png]]
+
 * 如何运行
 + Windows
   
