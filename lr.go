@@ -98,12 +98,20 @@ var (
 	inputArr    []string
 	cInput      string
 	aDoTable    []doline
+	errIndex    int
 )
 
 func main() {
+	var (
+		gramName  string
+		inputName string
+	)
+	fmt.Print("请输入记录文法串的文件名（带文件扩展名）：")
+	fmt.Scanf("%s", &gramName)
+
 	initialize()
 
-	readGrammar("test.txt")
+	readGrammar(gramName)
 
 	outputGrammar()
 
@@ -113,7 +121,9 @@ func main() {
 
 	getTable()
 
-	readInput("input.txt")
+	fmt.Print("请输入要进行语法分析的文件名（带文件扩展名）：")
+	fmt.Scanf("%s", &inputName)
+	readInput(inputName)
 
 	analysis()
 }
@@ -125,13 +135,18 @@ func analysis() {
 		if err != nil {
 			fmt.Printf("第%d个", key+1)
 			fmt.Println(err)
-			fmt.Println()
+			fmt.Println(value)
+			for i := 0; i < errIndex; i++ {
+				fmt.Print(" ")
+			}
+			fmt.Println("^")
 			aDoTable = aDoTable[index-1:]
 		}
 	}
 }
 
 func getDoTable(input string) (error, int) {
+	orInputLen := len(input)
 	input = input + "$"
 	iDoline := getADoline(input, 1)
 
@@ -144,6 +159,7 @@ func getDoTable(input string) (error, int) {
 		}
 		if iDoline.do == " " {
 			err := errors.New("待约串不能由此文法推导出来！")
+			errIndex = orInputLen - len(input)
 			return err, iDoline.no
 		}
 		iDoline.s = input
