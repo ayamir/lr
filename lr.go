@@ -92,7 +92,6 @@ var (
 	exps        []expMap
 	first       map[rune][]rune
 	follow      map[rune][]rune
-	flag        map[rune]bool
 	solus       []solu
 	aTable      table
 	inputArr    []string
@@ -106,8 +105,7 @@ func main() {
 		gramName  string
 		inputName string
 	)
-	fmt.Print("请输入记录文法串的文件名（带文件扩展名）：")
-	fmt.Scanf("%s", &gramName)
+	gramName = "test1.txt"
 
 	initialize()
 
@@ -121,8 +119,9 @@ func main() {
 
 	getTable()
 
-	fmt.Print("请输入要进行语法分析的文件名（带文件扩展名）：")
-	fmt.Scanf("%s", &inputName)
+	// fmt.Print("请输入要进行语法分析的文件名（带文件扩展名）：")
+	// fmt.Scanf("%s", &inputName)
+	inputName = "input1.txt"
 	readInput(inputName)
 
 	analysis()
@@ -157,9 +156,12 @@ func getDoTable(input string) (error, int) {
 		} else {
 			iDoline.do = aTable.action[state][mapShift([]rune(term)[0], true)]
 		}
-		if iDoline.do == " " {
+		if iDoline.do == " " || offset == -1 {
 			err := errors.New("待约串不能由此文法推导出来！")
 			errIndex = orInputLen - len(input)
+			if offset == -1 {
+				errIndex += 1
+			}
 			return err, iDoline.no
 		}
 		iDoline.s = input
@@ -251,11 +253,7 @@ func cut(s string) (int, string, string) {
 		}
 		kind = "num"
 		res = s[:offset]
-	} else if unicode.IsLower(c) {
-		offset = 1
-		kind = "alpha"
-		res = s[:offset]
-	} else if unicode.IsSymbol(c) || c == '-' || c == '(' || c == ')' || c == '*' || c == '/' {
+	} else if isExist(c, ts) {
 		offset = 1
 		kind = "symbol"
 		res = s[:offset]
@@ -365,11 +363,17 @@ func getTable() {
 			index := strings.Index(subExp, ".")
 			if index == len(subExp)-1 {
 				if chars[index-1] == oriBegin {
-					aTable.action[from][mapShift('$', true)] = "ACC"
+					if sE == '@' {
+						aTable.action[from][mapShift('$', true)] = "ACC"
+					} else {
+						for _, value := range follow[sE] {
+							aTable.action[from][mapShift(value, true)] = ("R" + strconv.Itoa(mapSubExp(sE, subExp)))
+						}
+					}
 				} else {
-					aTable.action[from][mapShift('$', true)] = ("R" + strconv.Itoa(mapSubExp(subExp)))
+					aTable.action[from][mapShift('$', true)] = ("R" + strconv.Itoa(mapSubExp(sE, subExp)))
 					for _, value := range follow[sE] {
-						aTable.action[from][mapShift(value, true)] = ("R" + strconv.Itoa(mapSubExp(subExp)))
+						aTable.action[from][mapShift(value, true)] = ("R" + strconv.Itoa(mapSubExp(sE, subExp)))
 					}
 				}
 			} else {
@@ -386,11 +390,11 @@ func getTable() {
 	printTable()
 }
 
-func mapSubExp(subExp string) int {
+func mapSubExp(sE rune, subExp string) int {
 	var res int
 	subExp = subExp[:len(subExp)-1]
 	for key, value := range exps {
-		if value.subExp == subExp {
+		if value.subExp == subExp && value.start == sE {
 			res = key
 			break
 		}
@@ -608,7 +612,6 @@ func moveDot(p int, oriExp string) string {
 func firstAndFollow() {
 	first = make(map[rune][]rune)
 	follow = make(map[rune][]rune)
-	flag = make(map[rune]bool)
 
 	for _, value := range vs {
 		first[value] = getFirst(value)
@@ -644,24 +647,48 @@ func getFollow(start rune) []rune {
 	if begin == start {
 		res = append(res, '$')
 	}
+
+	iterate := func(c rune, cs []rune) bool {
+		var res bool
+		for _, vc := range cs {
+			if c == vc {
+				res = true
+				break
+			}
+		}
+		return res
+	}
 	for _, value := range exps {
 		subExp := []rune(value.subExp)
 		for index, char := range subExp {
 			if char == start {
 				if len(subExp)-index == 1 {
 					if len(follow[value.start]) != 0 {
-						if !flag[char] {
-							res = append(res, follow[value.start]...)
-							flag[char] = true
+						for _, fChar := range follow[value.start] {
+							if !iterate(fChar, res) {
+								res = append(res, fChar)
+							}
 						}
+					} else if start == value.start {
+						continue
 					} else {
-						res = append(res, getFollow(value.start)...)
+						for _, fChar := range getFollow(value.start) {
+							if !iterate(fChar, res) {
+								res = append(res, fChar)
+							}
+						}
 					}
 				} else {
 					if isExist(subExp[index+1], ts) {
-						res = append(res, subExp[index+1])
+						if !iterate(subExp[index+1], res) {
+							res = append(res, subExp[index+1])
+						}
 					} else {
-						res = append(res, getFollow(subExp[index+1])...)
+						for _, fChar := range first[subExp[index+1]] {
+							if !iterate(fChar, res) {
+								res = append(res, fChar)
+							}
+						}
 					}
 				}
 			}
