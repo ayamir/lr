@@ -105,10 +105,11 @@ func main() {
 		gramName  string
 		inputName string
 	)
-	gramName = "test1.txt"
 
 	initialize()
 
+	fmt.Print("请输入语法的文件名（带文件扩展名）：")
+	fmt.Scanf("%s", &gramName)
 	readGrammar(gramName)
 
 	outputGrammar()
@@ -119,9 +120,8 @@ func main() {
 
 	getTable()
 
-	// fmt.Print("请输入要进行语法分析的文件名（带文件扩展名）：")
-	// fmt.Scanf("%s", &inputName)
-	inputName = "input1.txt"
+	fmt.Print("请输入要进行语法分析的文件名（带文件扩展名）：")
+	fmt.Scanf("%s", &inputName)
 	readInput(inputName)
 
 	analysis()
@@ -434,6 +434,19 @@ func findTo(from int, shift rune) int {
 	return res
 }
 
+func rmDupExp(arr []expMap) []expMap {
+	keys := make(map[expMap]bool)
+	list := []expMap{}
+
+	for _, entry := range arr {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
 func getClosure() {
 	iMap := expMap{begin, addDot(0, beginSubExp)}
 	iSolu := closure(iMap)
@@ -456,7 +469,7 @@ func getClosure() {
 			} else {
 				shift := []rune(subExp)[index+1]
 				from := p.x
-				list := goShift(shift, &solus[p.x])
+				list := rmDupExp(goShift(shift, &solus[p.x]))
 				isEx, i := isSoluExist(list)
 				if !isEx {
 					flags := make([]bool, 0)
@@ -614,10 +627,10 @@ func firstAndFollow() {
 	follow = make(map[rune][]rune)
 
 	for _, value := range vs {
-		first[value] = getFirst(value)
+		first[value] = rmDup(getFirst(value))
 	}
 	for _, value := range vs {
-		follow[value] = getFollow(value)
+		follow[value] = rmDup(getFollow(value))
 	}
 	fmt.Println("First集：")
 	printF(first)
@@ -642,22 +655,24 @@ func getFirst(start rune) []rune {
 	return res
 }
 
+func rmDup(arr []rune) []rune {
+	keys := make(map[rune]bool)
+	list := []rune{}
+	for _, entry := range arr {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
 func getFollow(start rune) []rune {
 	var res []rune
 	if begin == start {
 		res = append(res, '$')
 	}
 
-	iterate := func(c rune, cs []rune) bool {
-		var res bool
-		for _, vc := range cs {
-			if c == vc {
-				res = true
-				break
-			}
-		}
-		return res
-	}
 	for _, value := range exps {
 		subExp := []rune(value.subExp)
 		for index, char := range subExp {
@@ -665,29 +680,21 @@ func getFollow(start rune) []rune {
 				if len(subExp)-index == 1 {
 					if len(follow[value.start]) != 0 {
 						for _, fChar := range follow[value.start] {
-							if !iterate(fChar, res) {
-								res = append(res, fChar)
-							}
+							res = append(res, fChar)
 						}
 					} else if start == value.start {
 						continue
 					} else {
 						for _, fChar := range getFollow(value.start) {
-							if !iterate(fChar, res) {
-								res = append(res, fChar)
-							}
+							res = append(res, fChar)
 						}
 					}
 				} else {
 					if isExist(subExp[index+1], ts) {
-						if !iterate(subExp[index+1], res) {
-							res = append(res, subExp[index+1])
-						}
+						res = append(res, subExp[index+1])
 					} else {
 						for _, fChar := range first[subExp[index+1]] {
-							if !iterate(fChar, res) {
-								res = append(res, fChar)
-							}
+							res = append(res, fChar)
 						}
 					}
 				}
