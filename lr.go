@@ -622,6 +622,18 @@ func moveDot(p int, oriExp string) string {
 	return res
 }
 
+func rmDup(arr []rune) []rune {
+	keys := make(map[rune]bool)
+	list := []rune{}
+	for _, entry := range arr {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
 func firstAndFollow() {
 	first = make(map[rune][]rune)
 	follow = make(map[rune][]rune)
@@ -655,18 +667,6 @@ func getFirst(start rune) []rune {
 	return res
 }
 
-func rmDup(arr []rune) []rune {
-	keys := make(map[rune]bool)
-	list := []rune{}
-	for _, entry := range arr {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
-}
-
 func getFollow(start rune) []rune {
 	var res []rune
 	if begin == start {
@@ -678,24 +678,18 @@ func getFollow(start rune) []rune {
 		for index, char := range subExp {
 			if char == start {
 				if len(subExp)-index == 1 {
-					if len(follow[value.start]) != 0 {
-						for _, fChar := range follow[value.start] {
-							res = append(res, fChar)
-						}
-					} else if start == value.start {
+					if start == value.start {
 						continue
+					} else if len(follow[value.start]) != 0 {
+						res = append(res, follow[value.start]...)
 					} else {
-						for _, fChar := range getFollow(value.start) {
-							res = append(res, fChar)
-						}
+						res = append(res, getFollow(value.start)...)
 					}
 				} else {
 					if isExist(subExp[index+1], ts) {
 						res = append(res, subExp[index+1])
 					} else {
-						for _, fChar := range first[subExp[index+1]] {
-							res = append(res, fChar)
-						}
+						res = append(res, first[subExp[index+1]]...)
 					}
 				}
 			}
