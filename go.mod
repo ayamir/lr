@@ -1,3 +1,3 @@
-module lr
+module github.com/ayamir/lr
 
-go 1.15
+go 1.16
